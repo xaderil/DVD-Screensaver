@@ -13,4 +13,4 @@ add_executable(dvdAnimation main.cpp)
 
 target_link_libraries(dvdAnimation sfml-graphics)
 
-file(COPY ${CMAKE_SOURCE_DIR}/src/Pictures/dvd.png DESTINATION "${CMAKE_BINARY_DIR}/src/")
+file(COPY ${CMAKE_SOURCE_DIR}/src/dvd.png DESTINATION "${CMAKE_BINARY_DIR}/src/")
