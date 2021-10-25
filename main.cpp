@@ -1,25 +1,68 @@
 #define resolutionWidth 1280
 #define resolutionHeight 720
 #define framerateLimit 90
+
 #include <SFML/Graphics.hpp>
 #include <iostream>
+
+class DVD {
+
+public:
+    sf::Sprite sprite;
+
+    DVD(sf::Vector2f startPosition = {100.f,100.f},
+        sf::Vector2f startDirectionOfMoving = {0.5, 0.5},
+        float iconSizeX = 240,
+        float iconSizeY = 260,
+        float moveSpeed = 10 ) {
+
+            if(!texture.loadFromFile("src/dvd.png")) {
+                std::cout << "Could not load DVD picture" << std::endl;
+            }
+            directionOfMoving = startDirectionOfMoving;
+            size = {iconSizeX, iconSizeY};
+            speed = moveSpeed;
+            sprite.setTexture(texture);
+            sprite.scale(iconSizeX/spriteSize().x, iconSizeY/spriteSize().y);
+            sprite.setPosition(startPosition);
+            sprite.setColor(sf::Color::Blue);
+
+    }
+
+    sf::Vector2f spriteSize() {
+        return {static_cast<float>(sprite.getTexture()->getSize().x * sprite.getScale().x),
+                static_cast<float>(sprite.getTexture()->getSize().x * sprite.getScale().x)};
+    }
+
+    void moveDVD() {
+        sprite.move(speed*directionOfMoving.x, speed*directionOfMoving.y);
+    }
+
+    void checkPosition() {
+        position = sprite.getPosition();
+        if (resolutionWidth - position.x - size.x <= 0 || resolutionWidth - position.x >= resolutionWidth) {
+            directionOfMoving.x = -directionOfMoving.x;
+        } else if (resolutionHeight - position.y - size.y + 0.5*size.y <= 0 || resolutionHeight - position.y >= resolutionHeight) {
+            directionOfMoving.y = -directionOfMoving.y;
+        }
+    }
+
+private:
+    sf::Texture texture;
+    sf::Vector2f size;
+    sf::Vector2f position;
+    sf::Vector2f directionOfMoving;
+    float speed;
+};
+
 
 int main()
 {
     sf::RenderWindow window(sf::VideoMode(resolutionWidth, resolutionHeight), "My window");
     window.setFramerateLimit(framerateLimit);
+    DVD dvd;
 
-    sf::Texture textureDvd;
-    if(!textureDvd.loadFromFile("src/dvd.png")) {
-        std::cout << "Could not load DVD picture" << std::endl;
-    }
-    sf::Sprite dvdPict;
-    dvdPict.setTexture(textureDvd);
-    dvdPict.scale(0.17, 0.17);
-    dvdPict.setPosition(100, 100);
-    dvdPict.setColor(sf::Color::Yellow);
-
-    int32_t moveX = 10;
+    float moveX = 10;
     while (window.isOpen())
     {
         sf::Event event;
@@ -28,16 +71,11 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
-        window.clear(sf::Color::Blue);
+        window.clear(sf::Color::Black);
 
-        sf::Vector2f shapePosition = dvdPict.getPosition();
-        std::cout << shapePosition.x << " " << shapePosition.y << std::endl;
-        std::cout << resolutionWidth - shapePosition.x << " " << resolutionWidth - shapePosition.x + 270.5 << std::endl << std::endl;
-        if (resolutionWidth - shapePosition.x - 270.2 <= 0 || resolutionWidth - shapePosition.x >= resolutionWidth) {
-            moveX = -moveX;
-        }
-        dvdPict.move(moveX, 0);
-        window.draw(dvdPict);
+        dvd.checkPosition();
+        dvd.moveDVD();
+        window.draw(dvd.sprite);
         window.display();
     }
 
