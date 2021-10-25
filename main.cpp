@@ -1,6 +1,7 @@
 #define resolutionWidth 1280
 #define resolutionHeight 720
 #define framerateLimit 150
+#define numberOfIcons 10
 
 #include <SFML/Graphics.hpp>
 #include <iostream>
@@ -9,25 +10,24 @@
 class DVD {
 
 public:
-    sf::Sprite sprite;
-
     DVD(sf::Vector2f startPosition = {100.f,100.f},
         sf::Vector2f startDirectionOfMoving = {0.5, 0.5},
         float iconSizeX = 240,
         float iconSizeY = 260,
         float moveSpeed = 5 ) {
 
-            if(!texture.loadFromFile("src/dvd.png")) {
-                std::cout << "Could not load DVD picture" << std::endl;
-            }
-            directionOfMoving = startDirectionOfMoving;
-            size = {iconSizeX, iconSizeY};
-            speed = moveSpeed;
-            texture.setSmooth(true);
-            sprite.setTexture(texture);
-            sprite.scale(iconSizeX/spriteSize().x, iconSizeY/spriteSize().y);
-            sprite.setPosition(startPosition);
-            resetColor();
+        if(!texture.loadFromFile("src/dvd.png")) {
+            std::cout << "Could not load DVD picture" << std::endl;
+        }
+        directionOfMoving = startDirectionOfMoving;
+        size = {iconSizeX, iconSizeY};
+        speed = moveSpeed;
+        texture.setSmooth(true);
+        sprite.setTexture(texture);
+        sprite.scale(iconSizeX/spriteSize().x, iconSizeY/spriteSize().y);
+        sprite.setPosition(startPosition);
+        position = startPosition;
+        resetColor();
     }
 
     sf::Vector2f spriteSize() {
@@ -53,6 +53,7 @@ public:
         }
     }
 
+    sf::Sprite sprite;
 private:
     float speed;
     sf::Color color;
@@ -71,9 +72,28 @@ private:
 
 int main()
 {
-    sf::RenderWindow window(sf::VideoMode(resolutionWidth, resolutionHeight), "My window");
+    sf::RenderWindow window(sf::VideoMode(resolutionWidth, resolutionHeight), "DVD Screensaver");
     window.setFramerateLimit(framerateLimit);
-    DVD dvd;
+
+//    sf::Texture texture;
+//    if(!texture.loadFromFile("src/dvd.png")) {
+//        std::cout << "Could not load DVD picture" << std::endl;
+//    }
+//    texture.setSmooth(true);
+
+    std::vector<DVD> Icons(numberOfIcons);
+    float xDirection = 0.5, yDirection = 0.5;
+    for (int i = 0; i < numberOfIcons; i++) {
+        if(i % 2 != 0) {
+            xDirection = -xDirection;
+        } else if (i + 1 % 2 != 0) {
+            yDirection = -yDirection;
+        }
+        float x = static_cast<float>(10 + rand() % (resolutionWidth - 300));
+        float y = static_cast<float>(10 + rand() % (resolutionHeight - 300));
+        Icons[i] = DVD({x, y}, {xDirection, yDirection});
+    }
+    DVD dvd({200, 200}, {-0.5, 0.5});
 
     while (window.isOpen())
     {
@@ -84,7 +104,11 @@ int main()
                 window.close();
         }
         window.clear();
-
+        for (int i = 0; i < numberOfIcons; i++) {
+            Icons[i].checkPosition();
+            Icons[i].moveDVD();
+            window.draw(Icons[i].sprite);
+        }
         dvd.checkPosition();
         dvd.moveDVD();
         window.draw(dvd.sprite);
